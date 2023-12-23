@@ -1,7 +1,7 @@
 import * as MXP from 'maxpower';
 import { Skybox } from '../Entities/Skybox';
 import { FluidParticles } from '../Entities/FluidParticles';
-import { Plant } from '../Entities/Plant';
+import { ChristmasTree } from '../Entities/ChristmasTree';
 
 export const router = ( node: MXP.BLidgeNode ) => {
 
@@ -17,7 +17,7 @@ export const router = ( node: MXP.BLidgeNode ) => {
 
 	} else if ( node.class == "Plant" ) {
 
-		return new Plant();
+		return new ChristmasTree();
 
 	}
 

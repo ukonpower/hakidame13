@@ -642,7 +642,7 @@ export class MainCamera extends MXP.Entity {
 
 		if ( lookAt && lookAt.target ) {
 
-			lookAt.target.position.x = - 0.1 + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 0.07;
+			lookAt.target.position.x = - 0.03 + Math.max( 0, 1 / this.cameraComponent.aspect - 1 ) * 0.07;
 
 		}
 
