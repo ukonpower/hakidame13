@@ -18,8 +18,8 @@ let PlantParam = {
 		up: { value: 0.92, min: 0, max: 1, step: 0.01 }
 	},
 	branch: {
-		num: { value: 30, min: 0, max: 40, step: 1 },
-		depth: { value: 3, min: 0, max: 5, step: 1 },
+		num: { value: 40, min: 0, max: 80, step: 1 },
+		depth: { value: 2, min: 0, max: 5, step: 1 },
 		start: { value: 0.16, min: 0, max: 1, step: 0.01 },
 		end: { value: 1.0, min: 0, max: 1, step: 0.01 },
 		up: { value: 0.1, min: - 1, max: 1, step: 0.01 },
@@ -34,10 +34,10 @@ let PlantParam = {
 		radius: { value: 0.005, min: 0, max: 0.05, step: 0.001 },
 	},
 	leaf: {
-		size: { value: 0.18, min: 0, max: 1, step: 0.01 },
+		size: { value: 0.4, min: 0, max: 1, step: 0.01 },
 		dpeth: { value: 1, min: 0, max: 5, step: 1 },
 	},
-	seed: { value: 0, min: 0, max: 9999, step: 1 }
+	seed: { value: 1, min: 0, max: 9999, step: 1 }
 };
 
 const local = localStorage.getItem( "plant" );
@@ -110,26 +110,35 @@ export class ChristmasTree extends MXP.Entity {
 
 			if ( i >= PlantParam.leaf.dpeth.value && this.leaf ) {
 
-				const point = curve.getPoint( 1 );
+				const num = 10;
 
-				const leafEntity = new MXP.Entity();
+				for ( let j = 0; j < num; j ++ ) {
 
-				const geo = this.leaf.getComponent<MXP.Geometry>( "geometry" )!;
-				geo.setAttribute( "materialId", new Float32Array( new Array( geo.vertCount ).fill( 1 ) ), 1 );
-				leafEntity.addComponent( "geometry", geo );
+					const point = curve.getPoint( j / num );
 
-				const size = PlantParam.leaf.size.value;
-				leafEntity.scale.set( size );
+					const leafEntity = new MXP.Entity();
 
-				leafEntity.position.copy( point.position );
-				leafEntity.quaternion.multiply( new GLP.Quaternion().setFromMatrix( point.matrix ).multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, 0.0, - Math.PI / 2 ) ) ) );
+					const geo = this.leaf.getComponent<MXP.Geometry>( "geometry" )!;
+					geo.setAttribute( "materialId", new Float32Array( new Array( geo.vertCount ).fill( 1 ) ), 1 );
+					leafEntity.addComponent( "geometry", geo );
 
-				const pos = new GLP.Vector( 0, 0.0, 0.0 );
-				pos.applyMatrix3( point.matrix );
+					const size = PlantParam.leaf.size.value;
+					leafEntity.scale.set( size );
 
-				leafEntity.position.add( pos );
+					leafEntity.position.copy( point.position );
+					leafEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, 0.0, Math.PI / 2 ) ) );
+					leafEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, j / num * Math.PI * 2.0, 0.0 ) ) );
+					leafEntity.quaternion.multiply( new GLP.Quaternion().setFromMatrix( point.matrix ) );
 
-				branchEntity.add( leafEntity );
+					const pos = new GLP.Vector( 0, 0.0, 0.0 );
+					pos.applyMatrix3( point.matrix );
+
+					leafEntity.position.add( pos );
+
+					branchEntity.add( leafEntity );
+
+				}
+
 
 			}
 
@@ -258,7 +267,7 @@ export class ChristmasTree extends MXP.Entity {
 		this.root?.children.forEach( ( item, i ) => {
 
 			const wind = ( Math.sin( event.time * 1.0 ) * 0.5 + 0.5 ) * ( Math.sin( event.time * 1.4 ) * 0.5 + 0.5 );
-			item.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( Math.sin( event.time * 8.0 + i ) * wind * 0.006, 0.0, 0.0 ) ) );
+			// item.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( Math.sin( event.time * 8.0 + i ) * wind * 0.006, 0.0, 0.0 ) ) );
 
 		} );
 
