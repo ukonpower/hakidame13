@@ -20,12 +20,12 @@ export const createTextures = () => {
 
 
 	const prms = [
-		'/env/px.png',
-		'/env/py.png',
-		'/env/pz.png',
-		'/env/nx.png',
-		'/env/ny.png',
-		'/env/nz.png'
+		BASE_PATH + '/env/px.png',
+		BASE_PATH + '/env/py.png',
+		BASE_PATH + '/env/pz.png',
+		BASE_PATH + '/env/nx.png',
+		BASE_PATH + '/env/ny.png',
+		BASE_PATH + '/env/nz.png'
 	].map( path => new Promise<HTMLImageElement>( ( r )=> {
 
 		const img = document.createElement( "img" );
