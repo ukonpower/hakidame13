@@ -6,13 +6,14 @@ import { randomSeed } from '~/ts/libs/Math';
 
 import leafFrag from './shaders/leaf.fs';
 import branchFrag from './shaders/branch.fs';
+import emitFrag from './shaders/emit.fs';
 import plantFrag from './shaders/plant.fs';
 import plantVert from './shaders/plant.vs';
 
 import ornamentFrag from './shaders/ornament.fs';
 
 import { Modeler } from '~/ts/libs/Modeler';
-import { power } from '~/ts/Globals';
+import { globalUniforms, power } from '~/ts/Globals';
 
 let PlantParam = {
 	root: {
@@ -39,7 +40,7 @@ let PlantParam = {
 		size: { value: 0.6, min: 0, max: 1, step: 0.01 },
 		dpeth: { value: 1, min: 0, max: 5, step: 1 },
 	},
-	seed: { value: 3, min: 0, max: 9999, step: 1 }
+	seed: { value: 0, min: 0, max: 9999, step: 1 }
 };
 
 const local = localStorage.getItem( "plant" );
@@ -219,7 +220,7 @@ export class ChristmasTree extends MXP.Entity {
 				mat.vert = plantVert;
 				mat.cullFace = false;
 
-				const ornamentNum = 50;
+				const ornamentNum = 45;
 
 				for ( let i = 0; i < ornamentNum; i ++ ) {
 
@@ -240,44 +241,87 @@ export class ChristmasTree extends MXP.Entity {
 
 						const ornamentList = [
 							"Ornament_1",
-							"Ornament_1",
-							"Ornament_1",
-							"Ornament_1",
-							"Ornament_1",
-							"Ornament_2",
+							"Emitter",
 							"Ornament_2",
 							"Ornament_3",
-							"Ornament_3",
+							"Ornament_1",
 							"Ornament_4",
+							"Emitter",
 						];
 
-						const ornamentType = ornamentList[ Math.floor( random() * ornamentList.length ) ];
+						const ornamentType = ornamentList[ ( i ) % ornamentList.length ];
 
-						const geo = this.assets.getEntityByName( ornamentType )!.getComponent<MXP.Geometry>( "geometry" )!;
-						const mat = this.assets.getEntityByName( ornamentType )!.getComponent<MXP.Material>( "material" )!;
+						if ( ornamentType == "Emitter" ) {
 
-						ornamentEntity.addComponent( "geometry", geo );
-						const oMat = ornamentEntity.addComponent<MXP.Material>( "material", new MXP.Material( {
-							uniforms: { ...mat.uniforms, uType: {
-								value: Math.floor( random() * 2.0 ),
-								type: "1f"
-							} },
-							defines: {
-								...mat.defines,
-							},
-							frag: ornamentFrag,
-							vert: mat.vert
-						} ) );
 
-						( oMat.defines as any )[ ornamentType.toUpperCase() ] = "";
+							ornamentEntity.addComponent( "geometry", new MXP.SphereGeometry( 0.03, 12, 8 ) );
+							const oMat = ornamentEntity.addComponent<MXP.Material>( "material", new MXP.Material( {
+								uniforms: GLP.UniformsUtils.merge( globalUniforms.time, { uType: {
+									value: ( i ) % 2,
+									type: "1f"
+								} } ),
+								frag: emitFrag,
+							} ) );
+
+							( oMat.defines as any )[ ornamentType.toUpperCase() ] = "";
+
+						} else {
+
+							const geo = this.assets.getEntityByName( ornamentType )!.getComponent<MXP.Geometry>( "geometry" )!;
+							const mat = this.assets.getEntityByName( ornamentType )!.getComponent<MXP.Material>( "material" )!;
+
+							ornamentEntity.addComponent( "geometry", geo );
+							const oMat = ornamentEntity.addComponent<MXP.Material>( "material", new MXP.Material( {
+								uniforms: { ...mat.uniforms, uType: {
+									value: Math.floor( random() * 2.0 ),
+									type: "1f"
+								} },
+								defines: {
+									...mat.defines,
+								},
+								frag: ornamentFrag,
+								vert: mat.vert
+							} ) );
+
+							( oMat.defines as any )[ ornamentType.toUpperCase() ] = "";
+
+						}
 
 						ornamentEntity.position.copy( oPos );
-						ornamentEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0, Math.random() * Math.PI * 2.0, 0.0 ) ) );
+						ornamentEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0, random() * Math.PI * 1.0, 0.0 ) ) );
 						ornamentEntity.scale.multiply( 0.6 );
 
 						bModel.add( ornamentEntity );
 
 					}
+
+				}
+
+				if ( this.assets ) {
+
+					const ornamentEntity = new MXP.Entity();
+
+					const geo = this.assets.getEntityByName( "Ornament_5" )!.getComponent<MXP.Geometry>( "geometry" )!;
+					const mat = this.assets.getEntityByName( "Ornament_5" )!.getComponent<MXP.Material>( "material" )!;
+
+					ornamentEntity.addComponent( "geometry", geo );
+					const oMat = ornamentEntity.addComponent<MXP.Material>( "material", new MXP.Material( {
+						uniforms: { ...mat.uniforms, uType: {
+							value: Math.floor( random() * 2.0 ),
+							type: "1f"
+						} },
+						defines: {
+							...mat.defines,
+						},
+						frag: ornamentFrag,
+						vert: mat.vert
+					} ) );
+
+					ornamentEntity.position.set( - 0.01, 0.85, - 0.02 );
+					ornamentEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0, Math.PI / 2, 0.0 ) ) );
+					ornamentEntity.scale.multiply( 0.8 );
+
+					bModel.add( ornamentEntity );
 
 				}
 

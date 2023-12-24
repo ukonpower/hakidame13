@@ -159,6 +159,8 @@ export class BLidger extends Component {
 
 					}
 
+					entity.emit( "onModelLoaded" );
+
 				} );
 
 			}
