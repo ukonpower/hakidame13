@@ -9,6 +9,8 @@ import branchFrag from './shaders/branch.fs';
 import plantFrag from './shaders/plant.fs';
 import plantVert from './shaders/plant.vs';
 
+import ornamentFrag from './shaders/ornament.fs';
+
 import { Modeler } from '~/ts/libs/Modeler';
 import { power } from '~/ts/Globals';
 
@@ -34,7 +36,7 @@ let PlantParam = {
 		radius: { value: 0.005, min: 0, max: 0.05, step: 0.001 },
 	},
 	leaf: {
-		size: { value: 0.4, min: 0, max: 1, step: 0.01 },
+		size: { value: 0.6, min: 0, max: 1, step: 0.01 },
 		dpeth: { value: 1, min: 0, max: 5, step: 1 },
 	},
 	seed: { value: 3, min: 0, max: 9999, step: 1 }
@@ -57,6 +59,7 @@ let random = randomSeed( PlantParam.seed.value );
 
 export class ChristmasTree extends MXP.Entity {
 
+	private assets: MXP.Entity | null = null;
 	private leaf: MXP.Entity | null = null;
 	private root: MXP.Entity | null = null;
 
@@ -139,7 +142,6 @@ export class ChristmasTree extends MXP.Entity {
 
 				}
 
-
 			}
 
 			// child branch
@@ -159,7 +161,6 @@ export class ChristmasTree extends MXP.Entity {
 					}
 
 					const pointPos = ( branches == 1 ? 0.5 : p );
-
 					const point = curve.getPoint( pointPos );
 
 					const nd = direction.clone();
@@ -171,7 +172,6 @@ export class ChristmasTree extends MXP.Entity {
 					nd.normalize();
 
 					const nextDir = new GLP.Vector( 0.0, Math.sin( PlantParam.branch.up.value * Math.PI / 2.0 ), Math.cos( PlantParam.branch.up.value * Math.PI / 2.0 ) ).normalize();
-
 					const nextLength = length * PlantParam.branch.lengthMultiplier.value * ( 1.0 - random() * PlantParam.branch.lengthRandom.value ) * ( 1.0 - pointPos * PlantParam.branch.cone.value );
 
 					const child = branch( i + 1, nextDir, radius * point.weight, nextLength );
@@ -219,6 +219,60 @@ export class ChristmasTree extends MXP.Entity {
 				mat.vert = plantVert;
 				mat.cullFace = false;
 
+				const ornamentNum = 24;
+
+				for ( let i = 0; i < ornamentNum; i ++ ) {
+
+					// ornament
+
+					if ( this.assets ) {
+
+						const index = i / ornamentNum;
+						const theta = index * Math.PI * 8.5 + Math.PI / 2;
+
+						const posX = Math.sin( theta );
+						const posZ = Math.cos( theta );
+
+						const rad = 0.3 * ( 1.0 - index );
+						const oPos = new GLP.Vector( posX * rad, Math.pow( index, 1.8 ) * 0.6 + 0.2, posZ * rad );
+
+						const ornamentEntity = new MXP.Entity();
+
+						const ornamentList = [ "Ornament_1", "Ornament_2" ];
+
+						const ornamentType = ornamentList[ Math.floor( random() * ornamentList.length ) ];
+
+						const geo = this.assets.getEntityByName( ornamentType )!.getComponent<MXP.Geometry>( "geometry" )!;
+						const mat = this.assets.getEntityByName( ornamentType )!.getComponent<MXP.Material>( "material" )!;
+
+						ornamentEntity.addComponent( "geometry", geo );
+						const oMat = ornamentEntity.addComponent<MXP.Material>( "material", new MXP.Material( {
+							uniforms: { ...mat.uniforms, uType: {
+								value: Math.floor( random() * 2.0 ),
+								type: "1f"
+							} },
+							defines: {
+								...mat.defines,
+							},
+							frag: ornamentFrag,
+							vert: mat.vert
+						} ) );
+
+						( oMat.defines as any )[ ornamentType.toUpperCase() ] = "";
+
+						console.log( oMat.defines );
+
+
+						ornamentEntity.position.copy( oPos );
+						ornamentEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0, Math.random() * Math.PI * 2.0, 0.0 ) ) );
+						ornamentEntity.scale.multiply( 0.6 );
+
+						bModel.add( ornamentEntity );
+
+					}
+
+				}
+
 				plant.add( bModel );
 
 			}
@@ -228,8 +282,6 @@ export class ChristmasTree extends MXP.Entity {
 			this.root = plant;
 
 		};
-
-		// create();
 
 		// onchange
 
@@ -247,12 +299,10 @@ export class ChristmasTree extends MXP.Entity {
 
 		loader.load( BASE_PATH + "/scene.glb" ).then( gltf => {
 
-			console.log( gltf );
-
-
 			const leaf = gltf.scene.getEntityByName( "LeafPine" );
 
 			this.leaf = leaf!;
+			this.assets = gltf.scene.getEntityByName( "Assets" )!;
 
 			create();
 

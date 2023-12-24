@@ -15,7 +15,8 @@
 		"prefer-const": ["error", {
 			"destructuring": "any",
 			"ignoreReadBeforeAssign": false
-		}]
+		}],
+		"no-undef": "off"
 	},
 	"globals": {
 		"BASE_PATH": "readonly"

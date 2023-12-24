@@ -52,6 +52,8 @@ layout (location = 1) out vec4 glFragOut1;
 // 	vec3 specularColor;
 // };
 
+uniform float uOrnamentCol;
+
 void main( void ) {
 
 	//[
@@ -97,7 +99,7 @@ void main( void ) {
 		float dNV = clamp( dot( geo.normal, geo.viewDir ), 0.0, 1.0 );
 
 		float EF = mix( fresnel( dNV ), 1.0, mat.metalic );
-
+		
 		outColor += mat.specularColor * texture( uEnvTex, refDir ).xyz * EF * envIntensity;
 
 	#endif

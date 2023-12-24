@@ -202,8 +202,12 @@ export class DeferredPostProcess extends MXP.PostProcess {
 				uSSAOResolutionInv: {
 					value: ssao.resolutionInv,
 					type: '2fv'
-				}
-			} )
+				},
+				uEnvTex: globalUniforms.tex.uEnvTex
+			} ),
+			defines: {
+				USE_ENV: ""
+			}
 		} );
 
 		super( { passes: [

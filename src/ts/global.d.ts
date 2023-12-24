@@ -15,3 +15,5 @@ declare module '*.fs'{
 	const value: string;
 	export default value;
 }
+
+declare const BASE_PATH: string;
