@@ -15,17 +15,17 @@ import { power } from '~/ts/Globals';
 let PlantParam = {
 	root: {
 		num: { value: 1, min: 0, max: 10, step: 1 },
-		up: { value: 0.92, min: 0, max: 1, step: 0.01 }
+		up: { value: 1, min: 0, max: 1, step: 0.01 }
 	},
 	branch: {
-		num: { value: 40, min: 0, max: 80, step: 1 },
+		num: { value: 60, min: 0, max: 80, step: 1 },
 		depth: { value: 2, min: 0, max: 5, step: 1 },
-		start: { value: 0.16, min: 0, max: 1, step: 0.01 },
+		start: { value: 0.6, min: 0, max: 1, step: 0.01 },
 		end: { value: 1.0, min: 0, max: 1, step: 0.01 },
-		up: { value: 0.1, min: - 1, max: 1, step: 0.01 },
+		up: { value: - 0.2, min: - 1, max: 1, step: 0.01 },
 		wide: { value: 1.0, min: 0, max: 1, step: 0.01 },
-		curve: { value: 0.10, min: - 1, max: 1, step: 0.01 },
-		lengthMultiplier: { value: 0.5, min: 0, max: 2, step: 0.01 },
+		curve: { value: - 0.3, min: - 1, max: 1, step: 0.01 },
+		lengthMultiplier: { value: 1.0, min: 0, max: 2, step: 0.01 },
 		lengthRandom: { value: 0.0, min: 0, max: 1, step: 0.01 },
 		cone: { value: 1.0, min: 0, max: 1, step: 0.01 },
 	},
@@ -37,7 +37,7 @@ let PlantParam = {
 		size: { value: 0.4, min: 0, max: 1, step: 0.01 },
 		dpeth: { value: 1, min: 0, max: 5, step: 1 },
 	},
-	seed: { value: 1, min: 0, max: 9999, step: 1 }
+	seed: { value: 3, min: 0, max: 9999, step: 1 }
 };
 
 const local = localStorage.getItem( "plant" );
@@ -79,7 +79,7 @@ export class ChristmasTree extends MXP.Entity {
 				z: 0,
 			} );
 
-			const segs = 8;
+			const segs = 3;
 
 			for ( let i = 0; i < segs; i ++ ) {
 
@@ -110,11 +110,11 @@ export class ChristmasTree extends MXP.Entity {
 
 			if ( i >= PlantParam.leaf.dpeth.value && this.leaf ) {
 
-				const num = 10;
+				const num = 6;
 
 				for ( let j = 0; j < num; j ++ ) {
 
-					const point = curve.getPoint( j / num );
+					const point = curve.getPoint( ( j / num ) * 0.2 + 0.8 );
 
 					const leafEntity = new MXP.Entity();
 
@@ -127,7 +127,7 @@ export class ChristmasTree extends MXP.Entity {
 
 					leafEntity.position.copy( point.position );
 					leafEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, 0.0, Math.PI / 2 ) ) );
-					leafEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, j / num * Math.PI * 2.0, 0.0 ) ) );
+					leafEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0.0, j / num * Math.PI * 3.0, 0.0 ) ) );
 					leafEntity.quaternion.multiply( new GLP.Quaternion().setFromMatrix( point.matrix ) );
 
 					const pos = new GLP.Vector( 0, 0.0, 0.0 );
@@ -150,29 +150,27 @@ export class ChristmasTree extends MXP.Entity {
 
 				for ( let j = 0; j < branches; j ++ ) {
 
-					const pointPos = ( branches == 1 ? 0.5 : j / ( branches - 1 ) ) * ( PlantParam.branch.end.value - PlantParam.branch.start.value ) + PlantParam.branch.start.value;
+					let p = j / ( branches - 1 ) * ( PlantParam.branch.end.value - PlantParam.branch.start.value ) + PlantParam.branch.start.value;
+
+					if ( i < 2 ) {
+
+						p = j / ( branches - 1 ) * 0.4 + 0.6;
+
+					}
+
+					const pointPos = ( branches == 1 ? 0.5 : p );
 
 					const point = curve.getPoint( pointPos );
 
 					const nd = direction.clone();
 					nd.normalize();
 
-					const theta = ( random() - 0.5 ) * Math.PI * 2.0;
+					const theta = ( j / branches ) * Math.PI * 11.0;
 					nd.x += Math.sin( theta ) * PlantParam.branch.wide.value;
 					nd.z += Math.cos( theta ) * PlantParam.branch.wide.value;
 					nd.normalize();
 
-					// const nextDir = new GLP.Vector( 0.0, Math.sin( PlantParam.branch.up.value * Math.PI / 2.0 ), Math.cos( PlantParam.branch.up.value * Math.PI / 2.0 ) ).normalize();
-
-					const nextDir = new GLP.Vector(
-						0.2,
-						Math.sin( random() * Math.PI * 2.0 ),
-						Math.cos( random() * Math.PI * 2.0 ),
-					).normalize();
-
-					nextDir.applyMatrix4( point.matrix );
-
-
+					const nextDir = new GLP.Vector( 0.0, Math.sin( PlantParam.branch.up.value * Math.PI / 2.0 ), Math.cos( PlantParam.branch.up.value * Math.PI / 2.0 ) ).normalize();
 
 					const nextLength = length * PlantParam.branch.lengthMultiplier.value * ( 1.0 - random() * PlantParam.branch.lengthRandom.value ) * ( 1.0 - pointPos * PlantParam.branch.cone.value );
 
