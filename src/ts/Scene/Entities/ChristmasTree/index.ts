@@ -219,7 +219,7 @@ export class ChristmasTree extends MXP.Entity {
 				mat.vert = plantVert;
 				mat.cullFace = false;
 
-				const ornamentNum = 24;
+				const ornamentNum = 50;
 
 				for ( let i = 0; i < ornamentNum; i ++ ) {
 
@@ -238,7 +238,18 @@ export class ChristmasTree extends MXP.Entity {
 
 						const ornamentEntity = new MXP.Entity();
 
-						const ornamentList = [ "Ornament_1", "Ornament_2" ];
+						const ornamentList = [
+							"Ornament_1",
+							"Ornament_1",
+							"Ornament_1",
+							"Ornament_1",
+							"Ornament_1",
+							"Ornament_2",
+							"Ornament_2",
+							"Ornament_3",
+							"Ornament_3",
+							"Ornament_4",
+						];
 
 						const ornamentType = ornamentList[ Math.floor( random() * ornamentList.length ) ];
 
@@ -259,9 +270,6 @@ export class ChristmasTree extends MXP.Entity {
 						} ) );
 
 						( oMat.defines as any )[ ornamentType.toUpperCase() ] = "";
-
-						console.log( oMat.defines );
-
 
 						ornamentEntity.position.copy( oPos );
 						ornamentEntity.quaternion.multiply( new GLP.Quaternion().setFromEuler( new GLP.Euler( 0, Math.random() * Math.PI * 2.0, 0.0 ) ) );
